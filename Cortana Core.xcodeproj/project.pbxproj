@@ -14,6 +14,7 @@
 		48DB68CF2C96FDC90000BEE8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DB68CE2C96FDC90000BEE8 /* Model.swift */; };
 		48DB68D52C9721350000BEE8 /* GoogleGenerativeAI in Frameworks */ = {isa = PBXBuildFile; productRef = 48DB68D42C9721350000BEE8 /* GoogleGenerativeAI */; };
 		48DB68D82C97260B0000BEE8 /* SwiftDotenv in Frameworks */ = {isa = PBXBuildFile; productRef = 48DB68D72C97260B0000BEE8 /* SwiftDotenv */; };
+		48DB68DC2C9730FB0000BEE8 /* big_noodle_titling.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 48DB68DB2C9730FB0000BEE8 /* big_noodle_titling.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,8 @@
 		48DB68C32C96FD820000BEE8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		48DB68C62C96FD820000BEE8 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		48DB68CE2C96FDC90000BEE8 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		48DB68DB2C9730FB0000BEE8 /* big_noodle_titling.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = big_noodle_titling.ttf; sourceTree = "<group>"; };
+		48DB68DD2C9732680000BEE8 /* Cortana-Core-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Cortana-Core-Info.plist"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +60,7 @@
 		48DB68BE2C96FD800000BEE8 /* Cortana Core */ = {
 			isa = PBXGroup;
 			children = (
+				48DB68DD2C9732680000BEE8 /* Cortana-Core-Info.plist */,
 				48DB68D02C96FE5A0000BEE8 /* Core */,
 				48DB68CD2C96FDA30000BEE8 /* Model */,
 				48DB68BF2C96FD800000BEE8 /* Cortana_CoreApp.swift */,
@@ -86,6 +90,7 @@
 		48DB68D02C96FE5A0000BEE8 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				48DB68DB2C9730FB0000BEE8 /* big_noodle_titling.ttf */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -158,6 +163,7 @@
 			files = (
 				48DB68C72C96FD820000BEE8 /* Preview Assets.xcassets in Resources */,
 				48DB68C42C96FD820000BEE8 /* Assets.xcassets in Resources */,
+				48DB68DC2C9730FB0000BEE8 /* big_noodle_titling.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,6 +312,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Cortana Core/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Cortana-Core-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -342,6 +349,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Cortana Core/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Cortana-Core-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

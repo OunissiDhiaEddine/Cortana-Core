@@ -4,7 +4,7 @@ struct ContentView: View {
     @State private var messageText = ""
     @State var messages: [String] = ["Hi there chief ! How can i help today ? "]
     
-    @ObservedObject var network = Network(response: TranslationResponse(id: "", object: "", created: 0, choices: [])) // Initialize Network
+    @ObservedObject var network = Network(response: TranslationResponse(id: "", object: "", created: 0, choices: [])) 
 
     
     var body: some View {
@@ -21,6 +21,7 @@ struct ContentView: View {
                                     .clipShape(Circle())
                                     .padding(0)
                             }
+
             
             ScrollView {
                 ForEach(messages, id: \.self) { message in
@@ -32,7 +33,7 @@ struct ContentView: View {
                                 .padding()
                                 .foregroundColor(Color.white)
                                 .background(Color.blue.opacity(0.8))
-                                .cornerRadius(10)
+                                .cornerRadius(20)
                                 .padding(.horizontal, 16)
                                 .padding(.bottom, 10)
                         }
@@ -40,24 +41,25 @@ struct ContentView: View {
                         HStack {
                             Text(message)
                                 .padding()
-                                .background(Color.gray.opacity(0.15))
-                                .cornerRadius(10)
+                                .background(Color.gray.opacity(0.30))
+                                .cornerRadius(20)
                                 .padding(.horizontal, 16)
                                 .padding(.bottom, 10)
-                                .font(.system(size: 17))
+                                .font(.body)
                             Spacer()
                         }
                     }
                 }.rotationEffect(.degrees(180))
+                
             }
             .rotationEffect(.degrees(180))
-            .background(Color.gray.opacity(0.1))
+            .cornerRadius(10)
             
             HStack {
                 TextField("Type something", text: $messageText)
                     .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(10)
+                    .background(Color.white.opacity(1))
+                    .cornerRadius(20)
                     .onSubmit {
                         sendMessage(message: messageText)
                     }
@@ -71,8 +73,16 @@ struct ContentView: View {
                 .padding(.horizontal, 10)
             }
             .padding()
+            
         }
+        .background(
+                    Image("Background")
+                        .resizable()
+                        .scaledToFill()
+                        .edgesIgnoringSafeArea(.all)
+                )
     }
+    
     
     func sendMessage(message: String) {
         withAnimation {
