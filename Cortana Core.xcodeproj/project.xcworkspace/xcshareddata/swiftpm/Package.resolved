@@ -1,0 +1,24 @@
+{
+  "originHash" : "ff6c091a6dd23185cd6b1def7bc5854d3732982fd4c5ebe807b30af8b148e961",
+  "pins" : [
+    {
+      "identity" : "generative-ai-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google-gemini/generative-ai-swift",
+      "state" : {
+        "revision" : "44b8ce120425f9cf53ca756f3434ca2c2696f8bd",
+        "version" : "0.5.6"
+      }
+    },
+    {
+      "identity" : "swift-dotenv",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/thebarndog/swift-dotenv.git",
+      "state" : {
+        "revision" : "f6e7ca817d35eeccb20b62c87ee75963b01b29dc",
+        "version" : "2.0.1"
+      }
+    }
+  ],
+  "version" : 3
+}

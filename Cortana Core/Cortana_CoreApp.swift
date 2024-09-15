@@ -2,7 +2,7 @@
 //  Cortana_CoreApp.swift
 //  Cortana Core
 //
-//  Created by Dhia Eddine Ounissi on 2024-09-15.
+//  Created by Dhia Eddine Ounissi on 2022-02-04.
 //
 
 import SwiftUI
