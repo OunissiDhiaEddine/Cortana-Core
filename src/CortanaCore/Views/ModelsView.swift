@@ -7,25 +7,33 @@ struct ModelsView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    ForEach(ModelCatalog.all) { model in
-                        ModelRow(model: model, manager: manager)
-                    }
-                } footer: {
-                    Text("Models run entirely on this iPhone. Downloads happen once over Wi-Fi or cellular, then work offline.")
-                }
-                Section("Storage") {
-                    LabeledContent("Models on this iPhone", value: ByteCountFormatter.string(fromByteCount: manager.totalInstalledBytes, countStyle: .file))
-                }
-            }
-            .scrollContentBackground(.hidden)
-            .background(Theme.background)
+            ModelsList(manager: manager)
             .navigationTitle("Models")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { Button("Done") { dismiss() } }
         }
         .preferredColorScheme(.dark)
+    }
+}
+
+struct ModelsList: View {
+    var manager: ModelManager
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(ModelCatalog.all) { model in
+                    ModelRow(model: model, manager: manager)
+                }
+            } footer: {
+                Text("Models run entirely on this iPhone. Downloads happen once, then work offline.")
+            }
+            Section("Storage") {
+                LabeledContent("Models on this iPhone", value: ByteCountFormatter.string(fromByteCount: manager.totalInstalledBytes, countStyle: .file))
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(Theme.background)
     }
 }
 

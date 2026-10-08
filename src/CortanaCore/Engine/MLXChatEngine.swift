@@ -10,7 +10,7 @@ actor MLXChatEngine: ChatEngine {
     private var container: ModelContainer?
     private var target = ModelCatalog.default
 
-    nonisolated func reply(to history: [ChatMessage]) -> AsyncThrowingStream<String, Error> {
+    nonisolated func reply(to history: [ChatMessage], options: GenerationOptions) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
@@ -21,14 +21,14 @@ actor MLXChatEngine: ChatEngine {
                     }
                     let prior = history
                         .filter { $0.role != .system && $0.id != last.id && !$0.text.isEmpty }
-                        .suffix(ModelLimits.maxHistoryMessages)
+                        .suffix(options.maxHistoryMessages)
                         .map { $0.role == .user ? Chat.Message.user($0.text) : Chat.Message.assistant($0.text) }
 
                     let session = ChatSession(
                         model,
-                        instructions: Persona.systemPrompt,
+                        instructions: options.instructions,
                         history: Array(prior),
-                        generateParameters: GenerateParameters(maxTokens: ModelLimits.maxTokens, temperature: 0.7),
+                        generateParameters: GenerateParameters(maxTokens: options.maxTokens, temperature: options.temperature),
                         additionalContext: ["enable_thinking": false]
                     )
                     for try await chunk in session.streamResponse(to: last.text) {

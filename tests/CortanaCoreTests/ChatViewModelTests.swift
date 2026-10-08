@@ -2,7 +2,7 @@ import XCTest
 @testable import CortanaCore
 
 struct FixedEngine: ChatEngine {
-    func reply(to history: [ChatMessage]) -> AsyncThrowingStream<String, Error> {
+    func reply(to history: [ChatMessage], options: GenerationOptions) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { c in
             c.yield("Hello, ")
             c.yield("Chief.")

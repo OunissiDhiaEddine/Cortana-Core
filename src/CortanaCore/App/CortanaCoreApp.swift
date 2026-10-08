@@ -6,6 +6,7 @@ struct CortanaCoreApp: App {
     @State private var chat: ChatViewModel
     @State private var models: ModelManager
     private let store: ConversationStore
+    private let memory: MemoryStore
     private let container: ModelContainer
 
     init() {
@@ -15,13 +16,15 @@ struct CortanaCoreApp: App {
         let store = ConversationStore(context: container.mainContext)
         self.container = container
         self.store = store
-        _chat = State(initialValue: ChatViewModel(engine: engine, store: store))
+        let memory = MemoryStore(context: container.mainContext)
+        self.memory = memory
+        _chat = State(initialValue: ChatViewModel(engine: engine, store: store, memory: memory))
         _models = State(initialValue: ModelManager(engine: engine))
     }
 
     var body: some Scene {
         WindowGroup {
-            ChatView(model: chat, models: models, store: store)
+            ChatView(model: chat, models: models, store: store, memory: memory)
                 .task { models.prepareSelected() }
         }
     }

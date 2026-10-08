@@ -12,7 +12,7 @@ final class ConversationStore {
 
     static func makeContainer(inMemory: Bool = false) throws -> ModelContainer {
         try ModelContainer(
-            for: Conversation.self, StoredMessage.self,
+            for: Conversation.self, StoredMessage.self, Memory.self,
             configurations: .init(isStoredInMemoryOnly: inMemory))
     }
 

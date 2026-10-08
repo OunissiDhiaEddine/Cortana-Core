@@ -31,11 +31,15 @@ final class ChatViewModel {
 
     private let engine: ChatEngine
     private let store: ConversationStore?
+    private let memory: MemoryStore?
+    private let defaults: UserDefaults
     private var task: Task<Void, Never>?
 
-    init(engine: ChatEngine, store: ConversationStore? = nil) {
+    init(engine: ChatEngine, store: ConversationStore? = nil, memory: MemoryStore? = nil, defaults: UserDefaults = .standard) {
         self.engine = engine
         self.store = store
+        self.memory = memory
+        self.defaults = defaults
     }
 
     func send() {
@@ -58,10 +62,15 @@ final class ChatViewModel {
             conversation = target
         }
 
+        let memoryOn = GenerationOptions.isMemoryEnabled(defaults)
+        if memoryOn, let memory, let fact = MemoryExtractor.extract(from: text) {
+            memory.add(fact)
+        }
+        let options = GenerationOptions.current(memories: memoryOn ? memory?.promptTexts() ?? [] : [], defaults: defaults)
         let history = Array(messages.dropLast())
         task = Task {
             do {
-                for try await chunk in engine.reply(to: history) {
+                for try await chunk in engine.reply(to: history, options: options) {
                     update(reply.id) { $0.text += chunk }
                 }
             } catch is CancellationError {

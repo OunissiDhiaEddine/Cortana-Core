@@ -1,6 +1,12 @@
 # Dev log
 Newest first. One entry per stage: what changed, why, what is unverified.
 
+## Stage 7: settings and memory (2026-10-08)
+- Settings live in `UserDefaults` via `@AppStorage`; the view model snapshots them into `GenerationOptions` on each send, so the engine stays free of UI state.
+- Memory is explicit on purpose: only "remember that …" (or the manual add field) writes a memory. A 1.7B model is unreliable at choosing what to remember, and a wrong auto-memory is worse than none. Facts (max 20 most recent) are appended to the system prompt.
+- `ChatEngine.reply` now takes `GenerationOptions`.
+- **Unverified on device:** how well Qwen3-1.7B uses injected memories; may need a prompt tweak.
+
 ## Stage 6: chat history (2026-10-08)
 - SwiftData (`Conversation`, `StoredMessage`, cascade delete) behind a small `ConversationStore`; iOS 17 floor already allows it and it is the native choice (no third-party DB).
 - A chat is saved on first send, not on "new chat", so empty chats never pile up. The assistant reply is written to disk once when streaming ends (or is stopped), not per token.
