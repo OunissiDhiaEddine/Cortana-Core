@@ -1,6 +1,18 @@
 import Foundation
 import Observation
 
+enum ChatPhase: Equatable {
+    case idle, thinking, responding
+
+    var caption: String {
+        switch self {
+        case .idle: "Listening"
+        case .thinking: "Thinking…"
+        case .responding: "Responding"
+        }
+    }
+}
+
 @MainActor
 @Observable
 final class ChatViewModel {
@@ -9,6 +21,11 @@ final class ChatViewModel {
     ]
     var input = ""
     private(set) var isResponding = false
+
+    var phase: ChatPhase {
+        guard isResponding else { return .idle }
+        return messages.last?.text.isEmpty == true ? .thinking : .responding
+    }
 
     private let engine: ChatEngine
     private var task: Task<Void, Never>?

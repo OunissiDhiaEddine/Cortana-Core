@@ -31,4 +31,13 @@ final class ChatViewModelTests: XCTestCase {
         model.send()
         XCTAssertEqual(model.messages.count, before)
     }
+
+    func testPhaseIsIdleBeforeAndAfterReply() async throws {
+        let model = ChatViewModel(engine: FixedEngine())
+        XCTAssertEqual(model.phase, .idle)
+        model.input = "Hi"
+        model.send()
+        while model.isResponding { try await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertEqual(model.phase, .idle)
+    }
 }

@@ -1,6 +1,11 @@
 # Dev log
 Newest first. One entry per stage: what changed, why, what is unverified.
 
+## Stage 3: Cortana UI (2026-10-08)
+- Dark gradient theme, `CortanaOrb` (TimelineView-driven rings, three phases), inline markdown in bubbles, multi-line input with stop/send button, auto-scroll while streaming.
+- Removed the Microsoft logo and silver background assets from the in-app UI; the app icon is the only Microsoft artwork left.
+- **Unverified:** not compiled or viewed; the orb's look needs a pass on a real screen.
+
 ## Stage 2: on-device model (2026-10-08)
 - Chose MLX Swift + Qwen3-1.7B 4-bit; rationale in `docs/model-runtime.md`.
 - API shapes (`ChatSession(history:instructions:generateParameters:additionalContext:)`, `streamResponse`, `LLMRegistry` names) taken from mlx-swift-lm 3.31.x source.

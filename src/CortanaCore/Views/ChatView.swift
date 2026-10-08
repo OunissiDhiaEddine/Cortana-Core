@@ -2,70 +2,101 @@ import SwiftUI
 
 struct ChatView: View {
     @Bindable var model: ChatViewModel
+    @FocusState private var inputFocused: Bool
 
     var body: some View {
-        VStack {
-            HStack {
-                Text("Cortana Core")
-                    .font(.largeTitle).bold()
-                Image("customImage")
-                    .resizable().scaledToFit()
-                    .frame(width: 50, height: 50)
-                    .clipShape(Circle())
-            }
-
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: 10) {
-                        ForEach(model.messages) { message in
-                            bubble(message)
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                }
-                .onChange(of: model.messages.last?.text) {
-                    if let id = model.messages.last?.id {
-                        proxy.scrollTo(id, anchor: .bottom)
-                    }
-                }
-            }
-
-            HStack {
-                TextField("Type something", text: $model.input)
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(20)
-                    .onSubmit { model.send() }
-
-                Button { model.send() } label: {
-                    Image(systemName: "paperplane.fill")
-                }
-                .font(.system(size: 26))
-                .padding(.horizontal, 10)
-                .disabled(model.isResponding)
-            }
-            .padding()
+        VStack(spacing: 0) {
+            header
+            messageList
+            inputBar
         }
-        .background(
-            Image("Background")
-                .resizable().scaledToFill()
-                .ignoresSafeArea()
-        )
+        .background(Theme.background)
+        .preferredColorScheme(.dark)
     }
 
-    @ViewBuilder
-    private func bubble(_ message: ChatMessage) -> some View {
+    private var header: some View {
+        VStack(spacing: 6) {
+            CortanaOrb(phase: model.phase, size: 72)
+            Text(model.phase.caption)
+                .font(.footnote)
+                .foregroundStyle(Theme.cyan.opacity(0.8))
+                .animation(.default, value: model.phase)
+        }
+        .padding(.vertical, 12)
+    }
+
+    private var messageList: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 10) {
+                    ForEach(model.messages) { message in
+                        MessageBubble(message: message, showTyping: model.phase == .thinking && message.id == model.messages.last?.id)
+                            .id(message.id)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .onChange(of: model.messages.last?.text) {
+                if let id = model.messages.last?.id {
+                    proxy.scrollTo(id, anchor: .bottom)
+                }
+            }
+        }
+    }
+
+    private var inputBar: some View {
+        HStack(spacing: 10) {
+            TextField("Ask Cortana", text: $model.input, axis: .vertical)
+                .lineLimit(1...4)
+                .focused($inputFocused)
+                .padding(.horizontal, 16).padding(.vertical, 10)
+                .background(Theme.assistantBubble, in: RoundedRectangle(cornerRadius: 22))
+                .overlay(RoundedRectangle(cornerRadius: 22).stroke(Theme.cortanaBlue.opacity(inputFocused ? 0.8 : 0.25)))
+                .submitLabel(.send)
+                .onSubmit { model.send() }
+
+            Button {
+                model.isResponding ? model.stop() : model.send()
+            } label: {
+                Image(systemName: model.isResponding ? "stop.circle.fill" : "arrow.up.circle.fill")
+                    .font(.system(size: 34))
+                    .foregroundStyle(Theme.cortanaBlue)
+            }
+            .accessibilityLabel(model.isResponding ? "Stop" : "Send")
+        }
+        .padding(.horizontal, 16).padding(.vertical, 10)
+    }
+}
+
+private struct MessageBubble: View {
+    let message: ChatMessage
+    let showTyping: Bool
+
+    var body: some View {
         let isUser = message.role == .user
         HStack {
-            if isUser { Spacer() }
-            Text(message.text)
-                .padding()
-                .foregroundColor(isUser ? .white : .primary)
-                .background(isUser ? Color.blue.opacity(0.8) : Color.gray.opacity(0.3))
-                .cornerRadius(20)
-            if !isUser { Spacer() }
+            if isUser { Spacer(minLength: 48) }
+            Group {
+                if showTyping {
+                    Text("…").foregroundStyle(Theme.cyan)
+                } else {
+                    Text(markdown(message.text))
+                }
+            }
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .foregroundStyle(.white)
+            .background(isUser ? Theme.userBubble : Theme.assistantBubble, in: RoundedRectangle(cornerRadius: 20))
+            .textSelection(.enabled)
+            if !isUser { Spacer(minLength: 48) }
         }
-        .id(message.id)
+    }
+
+    /// Inline markdown (bold, italics, code, links) that tolerates half-streamed text.
+    private func markdown(_ text: String) -> AttributedString {
+        let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        return (try? AttributedString(markdown: text, options: options)) ?? AttributedString(text)
     }
 }
 
