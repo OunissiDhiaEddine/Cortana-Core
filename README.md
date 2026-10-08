@@ -22,4 +22,4 @@ Model: Qwen3-1.7B 4-bit via MLX Swift, downloaded once then fully offline ([deta
 | `scripts/` | Dev helpers |
 
 ## Notes
-Cortana and Halo are trademarks of Microsoft. This is an unaffiliated fan project; bundled Microsoft imagery is placeholder and should be replaced before any public release.
+Cortana and Halo are trademarks of Microsoft. This is an unaffiliated fan project. The app icon still uses Microsoft Cortana artwork as a placeholder and should be replaced before any public release.
