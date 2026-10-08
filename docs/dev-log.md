@@ -1,6 +1,12 @@
 # Dev log
 Newest first. One entry per stage: what changed, why, what is unverified.
 
+## Stage 2: on-device model (2026-10-08)
+- Chose MLX Swift + Qwen3-1.7B 4-bit; rationale in `docs/model-runtime.md`.
+- API shapes (`ChatSession(history:instructions:generateParameters:additionalContext:)`, `streamResponse`, `LLMRegistry` names) taken from mlx-swift-lm 3.31.x source.
+- Simulator falls back to the placeholder engine.
+- **Unverified:** no build, no device run; memory and speed on iPhone 14 still to be measured.
+
 ## Stage 1: repo hygiene and cloud removal (2026-10-08)
 - Surveyed the old app: single SwiftUI view + `Network` class POSTing to a Gemini URL read from the `API_KEY` env var; deps `generative-ai-swift` (unused in code) and `swift-dotenv`; iOS 16/17.5 targets; ~240 lines total.
 - Moved sources to `src/`, replaced hand-maintained `.xcodeproj` with XcodeGen `project.yml` to keep the layout clean and diffs reviewable.
