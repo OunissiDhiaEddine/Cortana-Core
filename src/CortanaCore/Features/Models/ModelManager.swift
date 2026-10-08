@@ -85,12 +85,13 @@ final class ModelManager {
         let needsDownload = !engine.isInstalled(model)
         activity = needsDownload ? .downloading(modelID: model.id, fraction: 0) : .loading(modelID: model.id)
         let previous = task
+        let onProgress: @Sendable (DownloadProgress) -> Void = { [weak self] progress in
+            Task { @MainActor in self?.report(progress, for: model) }
+        }
         task = Task {
             await previous?.value
             do {
-                try await engine.load(model) { [weak self] progress in
-                    Task { @MainActor in self?.report(progress, for: model) }
-                }
+                try await engine.load(model, onProgress: onProgress)
                 loadedID = model.id
                 activity = .idle
             } catch is CancellationError {

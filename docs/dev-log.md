@@ -1,6 +1,10 @@
 # Dev log
 Newest first. One entry per stage: what changed, why, what is unverified.
 
+## Stage 9: Xcode warnings (2026-10-08)
+- Xcode reported `KeyPath ... does not conform to 'Sendable'` inside the code that `#Predicate` and `SortDescriptor` expand to (HistoryView, Memory.swift). These come from SwiftData's macros under `SWIFT_STRICT_CONCURRENCY=complete`, not from our code, so the setting is lowered to `targeted`. Revisit `complete` / Swift 6 mode when SwiftData's macros are Sendable-clean.
+- `ModelManager.start`: the progress callback is built outside the `Task` so its `[weak self]` no longer differs from the task's implicit strong capture.
+
 ## Stage 8: cleanup and performance (2026-10-08)
 - **Structure:** feature folders, `MemoryView` split out of settings. Chose to keep MLX Swift, SwiftUI `@Observable` and SwiftData; no framework swap was justified (MLX is already the fastest native option on Apple GPUs, and SwiftData removes the need for any third-party store).
 - **Speed:** `MLXChatEngine` keeps a `ChatSession` between turns. It is reused only when the session has seen exactly the conversation so far and model, prompt, temperature and length are unchanged; otherwise it is rebuilt with the last N messages. Replying to turn N no longer re-processes turns 1..N-1.
