@@ -16,11 +16,13 @@ enum ChatPhase: Equatable {
 @MainActor
 @Observable
 final class ChatViewModel {
-    private(set) var messages: [ChatMessage] = [
-        ChatMessage(role: .assistant, text: Persona.greeting)
-    ]
+    private static let greeting = ChatMessage(role: .assistant, text: Persona.greeting)
+
+    private(set) var messages: [ChatMessage] = [greeting]
     var input = ""
     private(set) var isResponding = false
+    /// The saved conversation being shown; nil for a fresh chat that has not been sent yet.
+    private(set) var current: Conversation?
 
     var phase: ChatPhase {
         guard isResponding else { return .idle }
@@ -28,38 +30,78 @@ final class ChatViewModel {
     }
 
     private let engine: ChatEngine
+    private let store: ConversationStore?
     private var task: Task<Void, Never>?
 
-    init(engine: ChatEngine) {
+    init(engine: ChatEngine, store: ConversationStore? = nil) {
         self.engine = engine
+        self.store = store
     }
 
     func send() {
         let text = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isResponding else { return }
         input = ""
-        messages.append(ChatMessage(role: .user, text: text))
-        messages.append(ChatMessage(role: .assistant, text: ""))
+        let userMessage = ChatMessage(role: .user, text: text)
+        let reply = ChatMessage(role: .assistant, text: "")
+        messages.append(userMessage)
+        messages.append(reply)
         isResponding = true
         Log.chat.info("send: \(text.count) chars")
+
+        var conversation: Conversation?
+        if let store {
+            let target = current ?? store.create(firstMessage: text)
+            current = target
+            store.append(userMessage, to: target)
+            store.append(reply, to: target)
+            conversation = target
+        }
 
         let history = Array(messages.dropLast())
         task = Task {
             do {
                 for try await chunk in engine.reply(to: history) {
-                    messages[messages.count - 1].text += chunk
+                    update(reply.id) { $0.text += chunk }
                 }
             } catch is CancellationError {
                 Log.chat.info("reply cancelled")
             } catch {
                 Log.chat.error("reply failed: \(error.localizedDescription)")
-                messages[messages.count - 1].text = "Something went wrong, Chief."
+                update(reply.id) { $0.text = "Something went wrong, Chief." }
             }
             isResponding = false
+            if let conversation, let text = messages.first(where: { $0.id == reply.id })?.text {
+                store?.updateText(of: reply.id, in: conversation, to: text)
+            }
         }
     }
 
     func stop() {
         task?.cancel()
+    }
+
+    func newChat() {
+        stop()
+        current = nil
+        messages = [Self.greeting]
+        input = ""
+    }
+
+    func open(_ conversation: Conversation) {
+        guard conversation !== current else { return }
+        stop()
+        current = conversation
+        messages = [Self.greeting] + conversation.orderedMessages.map(\.asChatMessage)
+    }
+
+    /// Called after a conversation is deleted from the history list.
+    func conversationDeleted(_ conversation: Conversation) {
+        if conversation === current { newChat() }
+    }
+
+    private func update(_ id: UUID, _ change: (inout ChatMessage) -> Void) {
+        guard let index = messages.lastIndex(where: { $0.id == id }) else { return }
+        change(&messages[index])
     }
 }

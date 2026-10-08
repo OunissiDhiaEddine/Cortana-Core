@@ -1,6 +1,13 @@
 # Dev log
 Newest first. One entry per stage: what changed, why, what is unverified.
 
+## Stage 6: chat history (2026-10-08)
+- SwiftData (`Conversation`, `StoredMessage`, cascade delete) behind a small `ConversationStore`; iOS 17 floor already allows it and it is the native choice (no third-party DB).
+- A chat is saved on first send, not on "new chat", so empty chats never pile up. The assistant reply is written to disk once when streaming ends (or is stopped), not per token.
+- Search uses `localizedStandardContains` on title and message text in the `@Query` predicate.
+- If the on-disk store cannot be opened the app falls back to in-memory history instead of crashing.
+- **Unverified on device:** predicate behavior with large histories; schema migrations (none yet, v1).
+
 ## Stage 5: model download progress and management (2026-10-08)
 - `ModelCatalog` (Lite 0.6B / Core 1.7B / Prime 4B, all MLX 4-bit Qwen3), `ModelManager` (@Observable) for selection and download/load state, `ModelStorage` for on-disk size and delete via the Hugging Face hub cache.
 - Progress comes from the `progressHandler` of `#huggingFaceLoadModelContainer` (mlx-swift-lm 3.31.3). Byte readout is `fraction * approxBytes`, since the handler reports a fraction.
