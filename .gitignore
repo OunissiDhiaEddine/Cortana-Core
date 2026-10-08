@@ -15,3 +15,4 @@ models/
 # macOS
 .DS_Store
 src/CortanaCore/Info.plist
+src/CortanaCore/CortanaCore.entitlements

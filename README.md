@@ -11,6 +11,8 @@ Requires Xcode 16+ and iOS 17+ (target: iPhone 14 or newer).
 scripts/bootstrap.sh   # generates CortanaCore.xcodeproj from project.yml
 ```
 
+Model: Qwen3-1.7B 4-bit via MLX Swift, downloaded once then fully offline ([details](docs/model-runtime.md)). Run on a real iPhone; the simulator uses a placeholder.
+
 ## Layout
 | Path | Contents |
 |---|---|
