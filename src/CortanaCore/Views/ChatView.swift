@@ -4,9 +4,11 @@ struct ChatView: View {
     @Bindable var model: ChatViewModel
     var models: ModelManager
     var store: ConversationStore
+    var memory: MemoryStore
     @FocusState private var inputFocused: Bool
     @State private var showModels = false
     @State private var showHistory = false
+    @State private var showSettings = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -18,6 +20,9 @@ struct ChatView: View {
         .background(Theme.background)
         .preferredColorScheme(.dark)
         .sheet(isPresented: $showModels) { ModelsView(manager: models) }
+        .sheet(isPresented: $showSettings) {
+            SettingsView(chat: model, models: models, store: store, memory: memory).modelContext(store.context)
+        }
         .sheet(isPresented: $showHistory) { HistoryView(chat: model, store: store).modelContext(store.context) }
     }
 
@@ -44,10 +49,10 @@ struct ChatView: View {
             }
         }
         .overlay(alignment: .topTrailing) {
-            Button { showModels = true } label: {
-                Image(systemName: "cpu").font(.title3).foregroundStyle(Theme.cyan).padding(16)
+            Button { showSettings = true } label: {
+                Image(systemName: "gearshape").font(.title3).foregroundStyle(Theme.cyan).padding(16)
             }
-            .accessibilityLabel("Models")
+            .accessibilityLabel("Settings")
         }
     }
 
@@ -131,5 +136,6 @@ private struct MessageBubble: View {
     let engine = PlaceholderEngine()
     let container = try! ConversationStore.makeContainer(inMemory: true)
     let store = ConversationStore(context: container.mainContext)
-    ChatView(model: ChatViewModel(engine: engine, store: store), models: ModelManager(engine: engine), store: store)
+    let memory = MemoryStore(context: container.mainContext)
+    ChatView(model: ChatViewModel(engine: engine, store: store, memory: memory), models: ModelManager(engine: engine), store: store, memory: memory)
 }

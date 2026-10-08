@@ -42,9 +42,3 @@ enum ModelCatalog {
 
     static func option(id: String) -> ModelOption? { all.first { $0.id == id } }
 }
-
-/// Maximum number of recent messages replayed to the model each turn.
-enum ModelLimits {
-    static let maxHistoryMessages = 12
-    static let maxTokens = 512
-}

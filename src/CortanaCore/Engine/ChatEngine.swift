@@ -18,7 +18,7 @@ struct DownloadProgress: Sendable, Equatable {
 /// Anything that can turn a conversation into a stream of reply text chunks and manage its own model files.
 /// The on-device model engine implements this; the UI never talks to a model directly.
 protocol ChatEngine: Sendable {
-    func reply(to history: [ChatMessage]) -> AsyncThrowingStream<String, Error>
+    func reply(to history: [ChatMessage], options: GenerationOptions) -> AsyncThrowingStream<String, Error>
 
     /// Downloads the model if needed and loads it into memory, making it the model used for replies.
     func load(_ model: ModelOption, onProgress: @escaping @Sendable (DownloadProgress) -> Void) async throws
@@ -41,7 +41,7 @@ final class PlaceholderEngine: ChatEngine, @unchecked Sendable {
     private let lock = NSLock()
     private var installed: Set<String> = [ModelCatalog.default.id]
 
-    func reply(to history: [ChatMessage]) -> AsyncThrowingStream<String, Error> {
+    func reply(to history: [ChatMessage], options: GenerationOptions) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
                 for word in "On-device model not available in the simulator, Chief.".split(separator: " ") {
