@@ -1,7 +1,7 @@
 import XCTest
 @testable import CortanaCore
 
-private struct FixedEngine: ChatEngine {
+struct FixedEngine: ChatEngine {
     func reply(to history: [ChatMessage]) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { c in
             c.yield("Hello, ")

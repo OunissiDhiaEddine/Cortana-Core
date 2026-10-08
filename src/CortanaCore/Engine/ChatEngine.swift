@@ -5,7 +5,7 @@ enum ChatRole: String, Sendable {
 }
 
 struct ChatMessage: Identifiable, Equatable, Sendable {
-    let id = UUID()
+    var id = UUID()
     let role: ChatRole
     var text: String
 }

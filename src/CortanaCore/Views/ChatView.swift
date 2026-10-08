@@ -3,8 +3,10 @@ import SwiftUI
 struct ChatView: View {
     @Bindable var model: ChatViewModel
     var models: ModelManager
+    var store: ConversationStore
     @FocusState private var inputFocused: Bool
     @State private var showModels = false
+    @State private var showHistory = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -16,6 +18,7 @@ struct ChatView: View {
         .background(Theme.background)
         .preferredColorScheme(.dark)
         .sheet(isPresented: $showModels) { ModelsView(manager: models) }
+        .sheet(isPresented: $showHistory) { HistoryView(chat: model, store: store).modelContext(store.context) }
     }
 
     private var header: some View {
@@ -28,6 +31,18 @@ struct ChatView: View {
         }
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity)
+        .overlay(alignment: .topLeading) {
+            HStack(spacing: 0) {
+                Button { showHistory = true } label: {
+                    Image(systemName: "text.bubble").font(.title3).foregroundStyle(Theme.cyan).padding(16)
+                }
+                .accessibilityLabel("Chat history")
+                Button { model.newChat() } label: {
+                    Image(systemName: "square.and.pencil").font(.title3).foregroundStyle(Theme.cyan).padding(.vertical, 16)
+                }
+                .accessibilityLabel("New chat")
+            }
+        }
         .overlay(alignment: .topTrailing) {
             Button { showModels = true } label: {
                 Image(systemName: "cpu").font(.title3).foregroundStyle(Theme.cyan).padding(16)
@@ -114,5 +129,7 @@ private struct MessageBubble: View {
 
 #Preview {
     let engine = PlaceholderEngine()
-    ChatView(model: ChatViewModel(engine: engine), models: ModelManager(engine: engine))
+    let container = try! ConversationStore.makeContainer(inMemory: true)
+    let store = ConversationStore(context: container.mainContext)
+    ChatView(model: ChatViewModel(engine: engine, store: store), models: ModelManager(engine: engine), store: store)
 }
