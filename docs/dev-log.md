@@ -23,3 +23,8 @@ Newest first. One entry per stage: what changed, why, what is unverified.
 - Replaced `Network` with `ChatEngine` + `PlaceholderEngine`; the real on-device engine arrives in stage 2.
 - Fixed old bugs on the way: fixed 2s delay before showing a reply, `[USER]` string tag for roles, `fatalError` on missing URL.
 - **Unverified:** written without a Swift toolchain (Linux sandbox); first build/CI run on macOS is the real check.
+
+## 2026-10-08 first local build
+- bootstrap.sh OK; Xcode needs -skipMacroValidation (MLXHuggingFaceMacros) and the Metal Toolchain.
+- iPhone simulator build: succeeded, no compile errors.
+- Tests on iPhone 18 Pro simulator: 3 passed, 0 failed.
