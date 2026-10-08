@@ -10,6 +10,7 @@ Format: [Keep a Changelog](https://keepachangelog.com). Versions not yet release
 - Increased-memory-limit entitlement.
 - Cortana-style dark UI: animated blue ring (idle/thinking/responding), streaming markdown bubbles, stop button.
 - Halo-style Cortana persona prompt; `SpeechOutput` extension point and voice plan (`docs/voice.md`).
+- Model management: catalog of three on-device models, download/loading progress bar, in-chat status banner, Models screen (switch, delete, storage used).
 ### Removed
 - Gemini/Google API calls, `swift-dotenv`, and the committed `.xcodeproj` (now generated).
 - API-key-from-environment handling.

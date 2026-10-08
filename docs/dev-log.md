@@ -1,6 +1,13 @@
 # Dev log
 Newest first. One entry per stage: what changed, why, what is unverified.
 
+## Stage 5: model download progress and management (2026-10-08)
+- `ModelCatalog` (Lite 0.6B / Core 1.7B / Prime 4B, all MLX 4-bit Qwen3), `ModelManager` (@Observable) for selection and download/load state, `ModelStorage` for on-disk size and delete via the Hugging Face hub cache.
+- Progress comes from the `progressHandler` of `#huggingFaceLoadModelContainer` (mlx-swift-lm 3.31.3). Byte readout is `fraction * approxBytes`, since the handler reports a fraction.
+- Chat input stays disabled until a model is loaded, so a send can never trigger a silent download.
+- Simulator `PlaceholderEngine` fakes a download so the UI can be exercised without a GPU.
+- **Unverified on device:** real progress callback cadence, cancel mid-download, delete while loaded.
+
 ## Stage 4: persona and voice hook (2026-10-08)
 - Rewrote the system prompt as short rules (personality, style, constraints) because small models follow rules better than prose. Wording is original; no game dialogue copied.
 - Added `SpeechOutput` protocol and `docs/voice.md` (plan plus licensing concern with the original voice).
