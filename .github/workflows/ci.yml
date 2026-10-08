@@ -11,4 +11,4 @@ jobs:
       - name: Test
         run: >
           xcodebuild test -skipMacroValidation -skipPackagePluginValidation -project CortanaCore.xcodeproj -scheme CortanaCore
-          -destination 'platform=iOS Simulator,name=iPhone 15' CODE_SIGNING_ALLOWED=NO
+          -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO
