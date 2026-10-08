@@ -1,6 +1,11 @@
 # Dev log
 Newest first. One entry per stage: what changed, why, what is unverified.
 
+## Stage 4: persona and voice hook (2026-10-08)
+- Rewrote the system prompt as short rules (personality, style, constraints) because small models follow rules better than prose. Wording is original; no game dialogue copied.
+- Added `SpeechOutput` protocol and `docs/voice.md` (plan plus licensing concern with the original voice).
+- **Unverified:** persona quality on Qwen3-1.7B needs hands-on tuning on device; prompt is the main lever.
+
 ## Stage 3: Cortana UI (2026-10-08)
 - Dark gradient theme, `CortanaOrb` (TimelineView-driven rings, three phases), inline markdown in bubbles, multi-line input with stop/send button, auto-scroll while streaming.
 - Removed the Microsoft logo and silver background assets from the in-app UI; the app icon is the only Microsoft artwork left.

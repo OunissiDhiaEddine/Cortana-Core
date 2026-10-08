@@ -17,7 +17,7 @@ enum ChatPhase: Equatable {
 @Observable
 final class ChatViewModel {
     private(set) var messages: [ChatMessage] = [
-        ChatMessage(role: .assistant, text: "Hi there, Chief! How can I help today?")
+        ChatMessage(role: .assistant, text: Persona.greeting)
     ]
     var input = ""
     private(set) var isResponding = false
