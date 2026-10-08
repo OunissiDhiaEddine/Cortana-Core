@@ -33,7 +33,9 @@ final class ConversationStoreTests: XCTestCase {
     }
 
     func testViewModelPersistsAndRestoresConversation() async throws {
-        let (store, _) = try makeStore()
+        // The container must outlive the store: a ModelContext without its container crashes.
+        let (store, container) = try makeStore()
+        defer { withExtendedLifetime(container) {} }
         let model = ChatViewModel(engine: FixedEngine(), store: store)
         model.input = "Hi"
         model.send()
