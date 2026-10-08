@@ -15,8 +15,13 @@ final class ModelManager {
     private(set) var activity: Activity = .idle
     private(set) var selected: ModelOption
     private(set) var loadedID: String?
-    /// Bumped whenever on-disk state changes so views re-read installed flags and sizes.
-    private(set) var storageRevision = 0
+    /// Installed flag and size per model id. Cached because walking the disk on every redraw is slow.
+    private(set) var storage: [String: StorageInfo] = [:]
+
+    struct StorageInfo: Equatable, Sendable {
+        var installed: Bool
+        var bytes: Int64
+    }
 
     private let engine: ChatEngine
     private var task: Task<Void, Never>?
@@ -28,13 +33,14 @@ final class ModelManager {
         self.defaults = defaults
         let saved = defaults.string(forKey: Self.selectedKey).flatMap(ModelCatalog.option(id:))
         selected = saved ?? ModelCatalog.default
+        storage = Self.scan(engine)
     }
 
     var isBusy: Bool { activity != .idle && !isFailed }
     private var isFailed: Bool { if case .failed = activity { true } else { false } }
 
-    func isInstalled(_ model: ModelOption) -> Bool { _ = storageRevision; return engine.isInstalled(model) }
-    func installedBytes(_ model: ModelOption) -> Int64 { _ = storageRevision; return engine.installedBytes(model) }
+    func isInstalled(_ model: ModelOption) -> Bool { storage[model.id]?.installed ?? false }
+    func installedBytes(_ model: ModelOption) -> Int64 { storage[model.id]?.bytes ?? 0 }
     var totalInstalledBytes: Int64 { ModelCatalog.all.reduce(0) { $0 + installedBytes($1) } }
 
     /// Called at launch: load the selected model if it is already on disk. Never starts a surprise download.
@@ -60,7 +66,7 @@ final class ModelManager {
         Task {
             if loadedID == model.id { loadedID = nil }
             try? await engine.delete(model)
-            storageRevision += 1
+            await refreshStorage()
         }
     }
 
@@ -68,13 +74,19 @@ final class ModelManager {
     func unloadFromMemory() {
         guard loadedID != nil, !isBusy else { return }
         loadedID = nil
-        Task { await engine.unload() }
+        let previous = task
+        task = Task {
+            await previous?.value
+            await engine.unload()
+        }
     }
 
     private func start(_ model: ModelOption) {
         let needsDownload = !engine.isInstalled(model)
         activity = needsDownload ? .downloading(modelID: model.id, fraction: 0) : .loading(modelID: model.id)
+        let previous = task
         task = Task {
+            await previous?.value
             do {
                 try await engine.load(model) { [weak self] progress in
                     Task { @MainActor in self?.report(progress, for: model) }
@@ -87,8 +99,19 @@ final class ModelManager {
                 Log.engine.error("model load failed: \(error.localizedDescription)")
                 activity = Task.isCancelled ? .idle : .failed(modelID: model.id, message: error.localizedDescription)
             }
-            storageRevision += 1
+            await refreshStorage()
         }
+    }
+
+    private func refreshStorage() async {
+        let engine = engine
+        storage = await Task.detached { Self.scan(engine) }.value
+    }
+
+    nonisolated private static func scan(_ engine: ChatEngine) -> [String: StorageInfo] {
+        Dictionary(uniqueKeysWithValues: ModelCatalog.all.map { model in
+            (model.id, StorageInfo(installed: engine.isInstalled(model), bytes: engine.installedBytes(model)))
+        })
     }
 
     private func report(_ progress: DownloadProgress, for model: ModelOption) {

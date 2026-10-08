@@ -1,6 +1,14 @@
 # Dev log
 Newest first. One entry per stage: what changed, why, what is unverified.
 
+## Stage 8: cleanup and performance (2026-10-08)
+- **Structure:** feature folders, `MemoryView` split out of settings. Chose to keep MLX Swift, SwiftUI `@Observable` and SwiftData; no framework swap was justified (MLX is already the fastest native option on Apple GPUs, and SwiftData removes the need for any third-party store).
+- **Speed:** `MLXChatEngine` keeps a `ChatSession` between turns. It is reused only when the session has seen exactly the conversation so far and model, prompt, temperature and length are unchanged; otherwise it is rebuilt with the last N messages. Replying to turn N no longer re-processes turns 1..N-1.
+- **Memory:** `maxKVSize` 2048 rotates old context out of the KV cache. Weights unload on background (iOS also forbids Metal work there, so generation is stopped first) and reload when active again.
+- **UI:** 40 ms token batching, `Equatable` bubbles so only the streaming bubble re-renders, orb capped below 60 fps, cached storage sizes.
+- **Deferred:** (1) Swift 6 language mode: `SWIFT_STRICT_CONCURRENCY=complete` is on as warnings; flip `SWIFT_VERSION` once the build log shows none. (2) `MLX.Memory.cacheLimit` and quantized KV cache (`kvBits`): need the `mlx-swift` product linked directly, and quantized cache does not combine with the rotating cache; revisit after measuring on device.
+- **Unverified on device:** all of the above; measure time-to-first-token on turn 5 and peak memory on iPhone 14 with Instruments before and after.
+
 ## Stage 7: settings and memory (2026-10-08)
 - Settings live in `UserDefaults` via `@AppStorage`; the view model snapshots them into `GenerationOptions` on each send, so the engine stays free of UI state.
 - Memory is explicit on purpose: only "remember that …" (or the manual add field) writes a memory. A 1.7B model is unreliable at choosing what to remember, and a wrong auto-memory is worse than none. Facts (max 20 most recent) are appended to the system prompt.

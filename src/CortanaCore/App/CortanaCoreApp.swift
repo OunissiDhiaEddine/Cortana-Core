@@ -5,6 +5,7 @@ import SwiftUI
 struct CortanaCoreApp: App {
     @State private var chat: ChatViewModel
     @State private var models: ModelManager
+    @Environment(\.scenePhase) private var scenePhase
     private let store: ConversationStore
     private let memory: MemoryStore
     private let container: ModelContainer
@@ -26,6 +27,18 @@ struct CortanaCoreApp: App {
         WindowGroup {
             ChatView(model: chat, models: models, store: store, memory: memory)
                 .task { models.prepareSelected() }
+                .onChange(of: scenePhase) { _, phase in
+                    switch phase {
+                    case .background:
+                        // Metal work is not allowed in the background and the weights are the biggest memory user.
+                        chat.stop()
+                        models.unloadFromMemory()
+                    case .active:
+                        models.prepareSelected()
+                    default:
+                        break
+                    }
+                }
         }
     }
 

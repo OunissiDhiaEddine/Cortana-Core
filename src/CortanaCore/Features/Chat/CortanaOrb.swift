@@ -6,7 +6,7 @@ struct CortanaOrb: View {
     var size: CGFloat = 72
 
     var body: some View {
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation(minimumInterval: phase == .idle ? 1.0 / 20 : 1.0 / 30)) { timeline in
             let t = timeline.date.timeIntervalSinceReferenceDate
             let speed: Double = phase == .idle ? 0.25 : (phase == .thinking ? 1.4 : 0.8)
             let pulse = 1 + 0.04 * sin(t * (phase == .idle ? 1.2 : 3))

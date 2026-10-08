@@ -16,6 +16,7 @@ enum ChatPhase: Equatable {
 @MainActor
 @Observable
 final class ChatViewModel {
+    private static let flushInterval = Duration.milliseconds(40)
     private static let greeting = ChatMessage(role: .assistant, text: Persona.greeting)
 
     private(set) var messages: [ChatMessage] = [greeting]
@@ -70,9 +71,18 @@ final class ChatViewModel {
         let history = Array(messages.dropLast())
         task = Task {
             do {
+                // Tokens arrive far faster than the screen refreshes; batch them so each frame redraws once.
+                var pending = ""
+                var lastFlush = ContinuousClock.now
                 for try await chunk in engine.reply(to: history, options: options) {
-                    update(reply.id) { $0.text += chunk }
+                    pending += chunk
+                    if ContinuousClock.now - lastFlush >= Self.flushInterval {
+                        update(reply.id) { $0.text += pending }
+                        pending = ""
+                        lastFlush = .now
+                    }
                 }
+                if !pending.isEmpty { update(reply.id) { $0.text += pending } }
             } catch is CancellationError {
                 Log.chat.info("reply cancelled")
             } catch {
