@@ -2,16 +2,20 @@ import SwiftUI
 
 struct ChatView: View {
     @Bindable var model: ChatViewModel
+    var models: ModelManager
     @FocusState private var inputFocused: Bool
+    @State private var showModels = false
 
     var body: some View {
         VStack(spacing: 0) {
             header
+            ModelStatusBanner(manager: models) { showModels = true }
             messageList
             inputBar
         }
         .background(Theme.background)
         .preferredColorScheme(.dark)
+        .sheet(isPresented: $showModels) { ModelsView(manager: models) }
     }
 
     private var header: some View {
@@ -23,6 +27,13 @@ struct ChatView: View {
                 .animation(.default, value: model.phase)
         }
         .padding(.vertical, 12)
+        .frame(maxWidth: .infinity)
+        .overlay(alignment: .topTrailing) {
+            Button { showModels = true } label: {
+                Image(systemName: "cpu").font(.title3).foregroundStyle(Theme.cyan).padding(16)
+            }
+            .accessibilityLabel("Models")
+        }
     }
 
     private var messageList: some View {
@@ -48,14 +59,14 @@ struct ChatView: View {
 
     private var inputBar: some View {
         HStack(spacing: 10) {
-            TextField("Ask Cortana", text: $model.input, axis: .vertical)
+            TextField(models.loadedID == nil ? "Waiting for a model…" : "Ask Cortana", text: $model.input, axis: .vertical)
                 .lineLimit(1...4)
                 .focused($inputFocused)
                 .padding(.horizontal, 16).padding(.vertical, 10)
                 .background(Theme.assistantBubble, in: RoundedRectangle(cornerRadius: 22))
                 .overlay(RoundedRectangle(cornerRadius: 22).stroke(Theme.cortanaBlue.opacity(inputFocused ? 0.8 : 0.25)))
                 .submitLabel(.send)
-                .onSubmit { model.send() }
+                .onSubmit { if models.loadedID != nil { model.send() } }
 
             Button {
                 model.isResponding ? model.stop() : model.send()
@@ -64,6 +75,7 @@ struct ChatView: View {
                     .font(.system(size: 34))
                     .foregroundStyle(Theme.cortanaBlue)
             }
+            .disabled(models.loadedID == nil && !model.isResponding)
             .accessibilityLabel(model.isResponding ? "Stop" : "Send")
         }
         .padding(.horizontal, 16).padding(.vertical, 10)
@@ -101,5 +113,6 @@ private struct MessageBubble: View {
 }
 
 #Preview {
-    ChatView(model: ChatViewModel(engine: PlaceholderEngine()))
+    let engine = PlaceholderEngine()
+    ChatView(model: ChatViewModel(engine: engine), models: ModelManager(engine: engine))
 }

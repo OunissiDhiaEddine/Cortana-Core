@@ -2,9 +2,19 @@ import SwiftUI
 
 @main
 struct CortanaCoreApp: App {
+    @State private var chat: ChatViewModel
+    @State private var models: ModelManager
+
+    init() {
+        let engine = Self.makeEngine()
+        _chat = State(initialValue: ChatViewModel(engine: engine))
+        _models = State(initialValue: ModelManager(engine: engine))
+    }
+
     var body: some Scene {
         WindowGroup {
-            ChatView(model: ChatViewModel(engine: Self.makeEngine()))
+            ChatView(model: chat, models: models)
+                .task { models.prepareSelected() }
         }
     }
 

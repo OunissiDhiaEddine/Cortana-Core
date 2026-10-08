@@ -5,9 +5,10 @@ import MLXLLM
 import MLXLMCommon
 import Tokenizers
 
-/// Runs the model fully on device with MLX. Weights are downloaded once on first use, then cached.
+/// Runs the model fully on device with MLX. Weights are downloaded once, then cached.
 actor MLXChatEngine: ChatEngine {
     private var container: ModelContainer?
+    private var target = ModelCatalog.default
 
     nonisolated func reply(to history: [ChatMessage]) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
@@ -20,14 +21,14 @@ actor MLXChatEngine: ChatEngine {
                     }
                     let prior = history
                         .filter { $0.role != .system && $0.id != last.id && !$0.text.isEmpty }
-                        .suffix(ModelConfig.maxHistoryMessages)
+                        .suffix(ModelLimits.maxHistoryMessages)
                         .map { $0.role == .user ? Chat.Message.user($0.text) : Chat.Message.assistant($0.text) }
 
                     let session = ChatSession(
                         model,
                         instructions: Persona.systemPrompt,
                         history: Array(prior),
-                        generateParameters: GenerateParameters(maxTokens: ModelConfig.maxTokens, temperature: 0.7),
+                        generateParameters: GenerateParameters(maxTokens: ModelLimits.maxTokens, temperature: 0.7),
                         additionalContext: ["enable_thinking": false]
                     )
                     for try await chunk in session.streamResponse(to: last.text) {
@@ -43,11 +44,37 @@ actor MLXChatEngine: ChatEngine {
         }
     }
 
-    private func loadedContainer() async throws -> ModelContainer {
+    func load(_ model: ModelOption, onProgress: @escaping @Sendable (DownloadProgress) -> Void) async throws {
+        if target.id != model.id { container = nil }
+        target = model
+        _ = try await loadedContainer(onProgress: onProgress)
+    }
+
+    func unload() {
+        container = nil
+    }
+
+    nonisolated func isInstalled(_ model: ModelOption) -> Bool { ModelStorage.isInstalled(model) }
+    nonisolated func installedBytes(_ model: ModelOption) -> Int64 { ModelStorage.bytesOnDisk(model) }
+
+    func delete(_ model: ModelOption) throws {
+        if target.id == model.id { container = nil }
+        try ModelStorage.delete(model)
+    }
+
+    private func loadedContainer(
+        onProgress: @escaping @Sendable (DownloadProgress) -> Void = { _ in }
+    ) async throws -> ModelContainer {
         if let container { return container }
-        Log.engine.info("loading model \(ModelConfig.model.name)")
-        let loaded = try await #huggingFaceLoadModelContainer(configuration: ModelConfig.model)
-        container = loaded
+        let model = target
+        Log.engine.info("loading model \(model.name)")
+        let loaded = try await #huggingFaceLoadModelContainer(
+            configuration: model.configuration,
+            progressHandler: { progress in
+                onProgress(DownloadProgress(fraction: progress.fractionCompleted))
+            })
+        // The target may have changed while loading; keep the result only if it still matches.
+        if target.id == model.id { container = loaded }
         Log.engine.info("model ready")
         return loaded
     }
