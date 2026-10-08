@@ -62,6 +62,7 @@ struct ChatView: View {
                 LazyVStack(spacing: 10) {
                     ForEach(model.messages) { message in
                         MessageBubble(message: message, showTyping: model.phase == .thinking && message.id == model.messages.last?.id)
+                            .equatable()
                             .id(message.id)
                     }
                 }
@@ -102,7 +103,7 @@ struct ChatView: View {
     }
 }
 
-private struct MessageBubble: View {
+private struct MessageBubble: View, Equatable {
     let message: ChatMessage
     let showTyping: Bool
 
