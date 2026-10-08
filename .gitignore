@@ -1,0 +1,17 @@
+# Xcode
+*.xcodeproj
+xcuserdata/
+DerivedData/
+build/
+.swiftpm/
+*.xcuserstate
+# Secrets / local config
+.env
+*.xcconfig.local
+# Models (downloaded at runtime or by scripts, never committed)
+models/
+*.gguf
+*.safetensors
+# macOS
+.DS_Store
+src/CortanaCore/Info.plist
